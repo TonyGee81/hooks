@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Hello React</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+</head>
+
+
+<body>
+<div id="root"></div>
+<script type="text/babel">
+    const container = document.getElementById('root');
+
+    const Counter = (props) => {
+
+        const [counter, setCounter] = React.useState(0);
+
+        let timerId = null;
+        const timerIdPrevious = React.useRef(null);
+
+        const stop = () => {
+            if (timerIdPrevious.current !== null) {
+                clearInterval(timerIdPrevious.current);
+                timerIdPrevious.current = null;
+                console.log('stop');
+            }
+        };
+
+        const reset = () => {
+
+            stop();
+            console.log('reset');
+            timerIdPrevious.current = null;
+            setCounter(0);
+
+        };
+
+        const start = () => {
+            if (timerIdPrevious.current === null) {
+                timerIdPrevious.current = setInterval(() => {
+                        setCounter(counter => counter + 1)
+                    },
+                    1000
+                );
+            }
+
+        };
+
+        React.useEffect(
+            () => {
+
+                return () => {
+                    stop()
+                }
+            },
+            []
+        );
+
+        return (
+            <div>
+                <button onClick={start}>Start</button>
+                <button onClick={stop}>Stop</button>
+                <button onClick={reset}>Reset</button>
+                <div>{counter}</div>
+            </div>
+
+        );
+
+    };
+
+    const App = (props) => {
+
+        const [display, setDisplay] = React.useState(false);
+
+        return (
+            <div>
+                <button onClick={() => display ? setDisplay(false) : setDisplay(true)}>
+                    {display ? 'hide' : 'show'}
+                </button>
+                {display && <Counter/>}
+            </div>
+        )
+    };
+
+    ReactDOM.render(
+        <App/>,
+        container
+    );
+</script>
+</body>
+
+</html>
