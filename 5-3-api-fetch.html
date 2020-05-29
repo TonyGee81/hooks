@@ -17,25 +17,39 @@
     const container = document.getElementById('root');
     const url = 'https://jsonplaceholder.typicode.com/users';
 
+    const Spinner = (props) => {
+        return (
+            <div className="text-center" style={{width: "100%", height: '100vh'}}>
+                <div className="spinner-border m-auto" role="status" style={{position: 'relative', top: '50%'}}>
+                    <span className="sr-only">Loading...</span>
+                </div>
+            </div>
+        )
+    }
+
     const User = (props) => {
 
         const [names, setNames] = React.useState(null);
 
-        fetch(url).then(function(response) {
-            response.json().then(function(data) {
-                setNames(data);
-            });
-        });
+        async function loadData() {
 
-        return  names !== null  ? <Search data={names} /> :
-            <div className="text-center" style={ {width: "100%", height: '100vh'} }>
-                <div className="spinner-border m-auto" role="status" style={ {position: 'relative', top : '50%'} }>
-                <span className="sr-only">Loading...</span>
-            </div>
-            </div>
+            const response = await fetch(url);
+            const data = await response.json();
+            setNames(data);
+        }
+
+        React.useEffect(
+            () => {
+                loadData()
+            },
+            [url]
+        );
+
+        return names !== null ?
+            <Search data={names}/> :
+            <Spinner/>
             ;
-
-    }
+    };
 
     const Search = (props) => {
 
@@ -43,37 +57,12 @@
         const [nameData, setNameData] = React.useState([]);
 
         const search = (e) => {
-            setNameData([]);
-            props.data.filter( (user) =>  {
-
-                const regex = RegExp(e.currentTarget.value.toLowerCase());
-
-                if (regex.test(user.name.toLowerCase())){
-                    console.log('match')
-                    setNameData( oldArray => [ ...oldArray, user.name  ] );
-                }
-                else{
-                    console.log('no match')
-                }
-            })
-
+            const regex = new RegExp(`${e.currentTarget.value}.*`, 'gi');
+            setNameData(props.data.filter(user => user.name.match(regex)));
             e.preventDefault();
-        }
-
-
-        // React.useEffect(
-        //     () => {
-        //         setNameData([]);
-        //         console.log(' ################# remise à zéro #########################')
-        //         return () => {
-        //
-        //         }
-        //     },
-        //     [nameSearch]
-        // );
-
+        };
         return (
-            <div className="text-center">
+            <React.Fragment>
                 <section className="col-8 m-auto text-left">
                     <div className="form-group">
                         <label htmlFor="inputName">Name</label>
@@ -82,39 +71,47 @@
                                className="form-control"
                                id="inputName"
                                aria-describedby="nameHelp"
-                               placeholder="Enter name" />
+                               placeholder="Enter name"/>
                         <small id="nameHelp" className="form-text text-muted">chercher un nom</small>
                     </div>
                 </section>
+                <Listing nameData={nameData}/>
+            </React.Fragment>
+        )
+    };
 
-                <section>
-                    <table className="table">
-                        <thead>
-                        <tr>
-                            <th scope="col">name</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {
-                            nameData.map( (user, key) => {
-                                return (
-                                    <tr key={key}><td>{user}</td></tr>
-                                )
-                            })
-                        }
-                        </tbody>
-                    </table>
-                </section>
-            </div>
-        );
+    const Listing = (props) => {
 
+        return (
+            <section>
+                <table className="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {
+                        props.nameData.map((user, key) => {
+                            return (
+                                <tr key={key}>
+                                    <td>{user.name}</td>
+                                </tr>
+                            )
+                        })
+                    }
+                    </tbody>
+                </table>
+            </section>
+        )
     };
 
     const App = (props) => {
 
-
         return (
-            <User />
+            <div className="text-center">
+                <User/>
+            </div>
         )
     };
 
