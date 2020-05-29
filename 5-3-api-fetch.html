@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Hello React</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+</head>
+
+
+<body>
+<div id="root"></div>
+<script type="text/babel">
+    const container = document.getElementById('root');
+    const url = 'https://jsonplaceholder.typicode.com/users';
+
+    const User = (props) => {
+
+        const [names, setNames] = React.useState(null);
+
+        fetch(url).then(function(response) {
+            response.json().then(function(data) {
+                setNames(data);
+            });
+        });
+
+        return  names !== null  ? <Search data={names} /> :
+            <div className="text-center" style={ {width: "100%", height: '100vh'} }>
+                <div className="spinner-border m-auto" role="status" style={ {position: 'relative', top : '50%'} }>
+                <span className="sr-only">Loading...</span>
+            </div>
+            </div>
+            ;
+
+    }
+
+    const Search = (props) => {
+
+        const [nameSearch, setNameSearch] = React.useState(null);
+        const [nameData, setNameData] = React.useState([]);
+
+        const search = (e) => {
+            setNameData([]);
+            props.data.filter( (user) =>  {
+
+                const regex = RegExp(e.currentTarget.value.toLowerCase());
+
+                if (regex.test(user.name.toLowerCase())){
+                    console.log('match')
+                    setNameData( oldArray => [ ...oldArray, user.name  ] );
+                }
+                else{
+                    console.log('no match')
+                }
+            })
+
+            e.preventDefault();
+        }
+
+
+        // React.useEffect(
+        //     () => {
+        //         setNameData([]);
+        //         console.log(' ################# remise à zéro #########################')
+        //         return () => {
+        //
+        //         }
+        //     },
+        //     [nameSearch]
+        // );
+
+        return (
+            <div className="text-center">
+                <section className="col-8 m-auto text-left">
+                    <div className="form-group">
+                        <label htmlFor="inputName">Name</label>
+                        <input type="text"
+                               onChange={search}
+                               className="form-control"
+                               id="inputName"
+                               aria-describedby="nameHelp"
+                               placeholder="Enter name" />
+                        <small id="nameHelp" className="form-text text-muted">chercher un nom</small>
+                    </div>
+                </section>
+
+                <section>
+                    <table className="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">name</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {
+                            nameData.map( (user, key) => {
+                                return (
+                                    <tr key={key}><td>{user}</td></tr>
+                                )
+                            })
+                        }
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        );
+
+    };
+
+    const App = (props) => {
+
+
+        return (
+            <User />
+        )
+    };
+
+    ReactDOM.render(
+        <App/>,
+        container
+    );
+</script>
+</body>
+
+</html>
