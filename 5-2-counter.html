@@ -18,12 +18,20 @@
     const Counter = (props) => {
 
         const [counter, setCounter] = React.useState(0);
+        const [btnStop, setBtnStop] = React.useState(false);
+        const [btnStart, setBtnStart] = React.useState(true);
+        const [btnReset, setBtnReset] = React.useState(false);
 
         let timerId = null;
         const timerIdPrevious = React.useRef(null);
 
         const stop = () => {
             if (timerIdPrevious.current !== null) {
+
+                setBtnReset(false);
+                setBtnStop(false);
+                setBtnStart(true);
+
                 clearInterval(timerIdPrevious.current);
                 timerIdPrevious.current = null;
                 console.log('stop');
@@ -31,7 +39,6 @@
         };
 
         const reset = () => {
-
             stop();
             console.log('reset');
             timerIdPrevious.current = null;
@@ -40,6 +47,9 @@
         };
 
         const start = () => {
+            setBtnReset(true);
+            setBtnStop(true);
+            setBtnStart(false);
             if (timerIdPrevious.current === null) {
                 timerIdPrevious.current = setInterval(() => {
                         setCounter(counter => counter + 1)
@@ -52,19 +62,16 @@
 
         React.useEffect(
             () => {
-
-                return () => {
-                    stop()
-                }
+                return () => { stop() }
             },
             []
         );
 
         return (
             <div>
-                <button onClick={start}>Start</button>
-                <button onClick={stop}>Stop</button>
-                <button onClick={reset}>Reset</button>
+                <button onClick={start} disabled={btnStart ? '' : 'disabled'}>Start</button>
+                <button onClick={stop}  disabled={btnStop  ? '' : 'disabled'}>Stop</button>
+                <button onClick={reset} disabled={btnReset ? '' : 'disabled'}>Reset</button>
                 <div>{counter}</div>
             </div>
 
